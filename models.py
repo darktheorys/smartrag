@@ -11,27 +11,6 @@ class QueryAmbiguation(BaseModel):
     full_form_abbrv_map: list[Ambiguity] = Field(description="List of Mapping between full-form and abbreviation.")
 
 
-class AbbrvResolution(BaseModel):
-    full_form: str
-
-
-class Query(BaseModel):
-    query_1: str = Field(description="First Ambiguous query")
-    query_2: str = Field(description="Second Ambiguous query")
-    ambiguous_part: str = Field(
-        description="Short explanations for the abbreviations/homonyms, and the reasoning behing generation of queries."
-    )
-
-
-class Abbreviation(BaseModel):
-    abbreviation: str
-    full_form_1: str
-    full_form_2: str
-
-
-class IntentExtraction(BaseModel):
-    intent: str = Field(description="Intent of the query to be answered.")
-    requirements: list[str] = Field(description="Requirements of the query to be answered.")
 
 
 class AnswerStr(BaseModel):
