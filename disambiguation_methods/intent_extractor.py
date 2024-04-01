@@ -11,6 +11,7 @@ from langchain.prompts import (
 from langchain.pydantic_v1 import BaseModel, Field
 from tqdm import tqdm
 
+from disambiguation_methods.domain_extractor import categories
 from llm import llm
 from models import QueryAmbiguation
 
@@ -71,7 +72,12 @@ def extract_intent(df: pd.DataFrame, top_n: int) -> None:
         disambs = "".join([f"{i} - {full_form}\n" for i, full_form in enumerate(full_forms)])
 
         answer: IntentExtraction = chain.invoke(
-            {"query": query, "abbrv": amb.abbreviation, "disambs": disambs, "domain": df.loc[i, "domain"]}
+            {
+                "query": query,
+                "abbrv": amb.abbreviation,
+                "disambs": disambs,
+                "domain": categories[df.loc[i, "domain_idx"]][0] if df.loc[i, "domain_idx"] < len(categories) else None,
+            }
         )
 
         df.loc[i, "intent"] = answer.intent

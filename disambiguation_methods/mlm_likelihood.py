@@ -49,7 +49,11 @@ def get_mlm_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_suggestion:
         most_likely_full_form_probs = []
         most_likely_selection_type = []
         top_n_full_form_probs = []
-        for suggestions, amb in zip(all_ambiguity_suggestions, ambiguities.full_form_abbrv_map):
+        for suggestions, amb, sources in zip(
+            all_ambiguity_suggestions,
+            ambiguities.full_form_abbrv_map,
+            json.loads(df.loc[query_n, f"top_{top_n}_full_form_sources"]),
+        ):
             to_be_masked_question = ambiguous_question.replace(amb.abbreviation, amb.abbreviation + " ({abbreviation})")
             suggestion_likelihoods = []
             for suggestion in suggestions:
@@ -97,7 +101,7 @@ def get_mlm_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_suggestion:
                 most_likely_full_forms.append(suggestions[most_likely_index])
                 most_likely_full_form_probs.append(suggestion_likelihoods[most_likely_index])
                 most_likely_selection_type.append(
-                    "API" if most_likely_index != (len(suggestion_likelihoods) - 1) else "LLM"
+                    sources[most_likely_index] if most_likely_index != (len(suggestion_likelihoods) - 1) else "LLM"
                 )
                 top_n_full_form_probs.append(suggestion_likelihoods[:-1])
 

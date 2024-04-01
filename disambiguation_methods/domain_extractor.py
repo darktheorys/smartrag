@@ -14,6 +14,7 @@ from llm import llm
 categories = [
     (
         "SCIENCE",
+        "Academic & Science",
         (
             "Amateur Radio",
             "Architecture",
@@ -32,7 +33,28 @@ categories = [
         ),
     ),
     (
+        "COMPUTING",
+        "Computing",
+        (
+            "Assembly",
+            "Databases",
+            "DOS Commands",
+            "Drivers",
+            "File Extensions",
+            "General",
+            "Hardware",
+            "Java",
+            "Networking",
+            "Security",
+            "Software",
+            "Telecom",
+            "Texting",
+            "Unix Commands",
+        ),
+    ),
+    (
         "COMMUNITY",
+        "Community",
         (
             "Conferences",
             "Educational",
@@ -53,6 +75,7 @@ categories = [
     ),
     (
         "BUSINESS",
+        "Business & Finance",
         (
             "Accounting",
             "Firms",
@@ -68,14 +91,17 @@ categories = [
     ),
     (
         "GOVERNMENTAL",
+        "Governmental",
         ("FBI", "FDA", "Military", "NASA", "Police", "State & Local", "Suppliers", "Transportation", "UN", "US Gov"),
     ),
     (
         "INTERNET",
+        "Internet",
         ("ASCII", "Blogs", "Chat", "Domain Names", "Emoticons", "HTTP", "MIME", "Twitter", "Wannas", "Websites"),
     ),
     (
         "MISCELLANEOUS",
+        "Miscellaneous",
         (
             "Chess",
             "Clothes",
@@ -97,6 +123,7 @@ categories = [
     ),
     (
         "REGIONAL",
+        "Regional",
         (
             "Airport Codes",
             "African",
@@ -116,6 +143,7 @@ categories = [
     ),
     (
         "MEDICAL",
+        "Medical",
         (
             "British Medicine",
             "Dental",
@@ -134,6 +162,7 @@ categories = [
     ),
     (
         "INTERNATIONAL",
+        "International",
         (
             "Arabic",
             "Dutch",
@@ -173,7 +202,9 @@ Domain names are provided below with their subset of subcategories within that d
 user_message = """Query: {query}
 Output:"""
 
-serialized_categories = "\n".join([f"{i} - {cat}\n\t-" + "\n\t-".join(ex) for i, (cat, ex) in enumerate(categories)])
+serialized_categories = "\n".join(
+    [f"{i} - {cat}\n\t-" + "\n\t-".join(ex) for i, (cat, alias, ex) in enumerate(categories)]
+)
 
 
 output_parser = PydanticOutputParser(pydantic_object=DomainExtraction)
@@ -204,4 +235,5 @@ def extract_domains(df: pd.DataFrame) -> None:
 
         response: DomainExtraction = chain.invoke({"query": query})
 
-        df.loc[i, "domain"] = categories[response.selection][0] if response.selection < len(categories) else None
+        df.loc[i, "domain_idx"] = int(response.selection)
+    df["domain_idx"] = df["domain_idx"].astype(int)

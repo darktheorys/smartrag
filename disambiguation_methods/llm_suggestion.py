@@ -11,6 +11,7 @@ from langchain.prompts import (
 from langchain.pydantic_v1 import BaseModel
 from tqdm import tqdm
 
+from disambiguation_methods.domain_extractor import categories
 from llm import llm
 from models import QueryAmbiguation
 
@@ -61,7 +62,13 @@ def get_abbreviation_suggestions(df: pd.DataFrame, top_n: int = 10) -> None:
         suggestions = []
         for amb in ambiguities.full_form_abbrv_map:
             answer1: AbbrvResolution = llm_suggestor.invoke(
-                {"query": ambiguous_question, "abbrv": amb.abbreviation, "domain": df.loc[i, "domain"]}
+                {
+                    "query": ambiguous_question,
+                    "abbrv": amb.abbreviation,
+                    "domain": categories[df.loc[i, "domain_idx"]][0]
+                    if df.loc[i, "domain_idx"] < len(categories)
+                    else None,
+                }
             )
             suggestions.append(answer1.full_form)
         df.loc[i, "llm_full_form_suggestions"] = json.dumps(suggestions)

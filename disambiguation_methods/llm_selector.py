@@ -11,6 +11,7 @@ from langchain.prompts import (
 from langchain.pydantic_v1 import BaseModel
 from tqdm import tqdm
 
+from disambiguation_methods.domain_extractor import categories
 from llm import llm
 from models import QueryAmbiguation
 
@@ -55,7 +56,7 @@ selector_prompt = ChatPromptTemplate.from_messages(messages=selector_messages)
 selector_chain = selector_prompt | llm | selector_output_parser
 
 
-def get_llm_selections(df: pd.DataFrame, top_n: int, domain: str | None = None):
+def get_llm_selections(df: pd.DataFrame, top_n: int):
     for query_n in tqdm(range(len(df))):
         ambiguous_question = df.loc[query_n, "ambiguous_question"]
         ambiguities = QueryAmbiguation(**json.loads(df.loc[query_n, "possible_ambiguities"]))
@@ -70,13 +71,21 @@ def get_llm_selections(df: pd.DataFrame, top_n: int, domain: str | None = None):
 
         most_likely_full_forms = []
         most_likely_selection_type = []
-        for idx, (suggestions, amb) in enumerate(zip(all_ambiguity_suggestions, ambiguities.full_form_abbrv_map)):
+        for idx, (suggestions, amb, sources) in enumerate(
+            zip(
+                all_ambiguity_suggestions,
+                ambiguities.full_form_abbrv_map,
+                json.loads(df.loc[query_n, f"top_{top_n}_full_form_sources"]),
+            )
+        ):
             resp = selector_chain.invoke(
                 {
                     "abbrv": amb.abbreviation,
                     "query": ambiguous_question,
                     "options": [f"{i} - {opt}\n" for i, opt in enumerate(suggestions)],
-                    "domain": domain if domain else "",
+                    "domain": categories[df.loc[i, "domain_idx"]][0]
+                    if df.loc[i, "domain_idx"] < len(categories)
+                    else None,
                 }
             )
             most_likely_full_forms.append(
@@ -84,6 +93,6 @@ def get_llm_selections(df: pd.DataFrame, top_n: int, domain: str | None = None):
                 if resp.selection_id != -1
                 else json.loads(df.loc[query_n, "llm_full_form_suggestions"])[idx]
             )
-            most_likely_selection_type.append("API" if resp.selection_id != -1 else "LLM")
+            most_likely_selection_type.append(sources[resp.selection_id] if resp.selection_id != -1 else "LLM")
         df.loc[query_n, "LLM_most_likely_full_forms"] = json.dumps(most_likely_full_forms)
         df.loc[query_n, "LLM_most_likely_selection_types"] = json.dumps(most_likely_selection_type)

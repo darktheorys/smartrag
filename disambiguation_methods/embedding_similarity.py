@@ -31,7 +31,11 @@ def get_embedding_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_sugge
         most_likely_full_form_probs = []
         most_likely_selection_type = []
         top_n_full_form_probs = []
-        for suggestions, amb in zip(all_ambiguity_suggestions, ambiguities.full_form_abbrv_map):
+        for suggestions, amb, sources in zip(
+            all_ambiguity_suggestions,
+            ambiguities.full_form_abbrv_map,
+            json.loads(df.loc[query_n, f"top_{top_n}_full_form_sources"]),
+        ):
             to_be_disambiguate_question = ambiguous_question.replace(
                 amb.abbreviation, amb.abbreviation + " ({abbreviation})"
             )
@@ -52,7 +56,9 @@ def get_embedding_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_sugge
                 most_likely_index = arr.argmax()
                 most_likely_full_forms.append(suggestions[most_likely_index])
                 most_likely_full_form_probs.append(similarities[most_likely_index])
-                most_likely_selection_type.append("API" if most_likely_index != (len(similarities) - 1) else "LLM")
+                most_likely_selection_type.append(
+                    sources[most_likely_index] if most_likely_index != (len(similarities) - 1) else "LLM"
+                )
                 top_n_full_form_probs.append(similarities[:-1])
 
         df.loc[query_n, "TE_ground_truth_full_form_prob"] = json.dumps(ground_truth_full_form_probs)
