@@ -2,47 +2,32 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import (
+    OutputFixingParser,
+    PydanticOutputParser,
+)
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     PromptTemplate,
     SystemMessagePromptTemplate,
 )
+from langchain_core.runnables import RunnableConfig
 from tqdm import tqdm
 
 from llm import llm
 from models import QueryAmbiguation
 
-sys_message = """Given a query from a multi-hop complex question-answer dataset, your task is to identify full-forms or abbreviations contained in the query.
-If query contains such full-form and abbreviation pairs, you will produce output accordingly. There can be more than one abbreviation/full-form inside given query. 
-The output should look like a list if that is the case.
+sys_message = """Given a query from a question-answer dataset, your task is to identify abbreviations or possible abbreviations contained in the query.
 
-Extract everything as is, without changing a single thing, case, punctuation, encoding, anything.
-After getting ambiguities from you, user will replace abbreviations with full-forms, therefore make sure everything make sense extracting the abbreviations and full-forms.
-If you believe that the abbreviation-full form pairs create an ambiguity when answering the question, then you extract that.
-If you dont think existing abbreviation-full form pairs are easy to misinterpret, then ignore that and continue.
+- Extract everything as is, without changing a single thing, case, punctuation, encoding, anything.
+- If there is an explicit abbreviation in the query, type is "abbreviation" and other fields are abbreviation itself and its full-form.
+- If there is an implicit abbreviation (full-form) in the query, type is "full_form" and other fields are full-form itself and its abbreviation.
 
-Bad Example:
-Query: What is (are) Arts syndrome ?
-Ambiguities: {{"full_form_abbrv_map": [{{"ambiguity_type": "abbreviation", "abbreviation": "Arts", "full_form": "Arts syndrome"}}]}}
-
-Very Bad Example:
-Query: What is (are) X-linked creatine deficiency ?
-Ambiguities: {{"full_form_abbrv_map": [{{"ambiguity_type": "abbreviation", "abbreviation": "X-linked", "full_form": "(are) X-linked creatine deficiency"}}]}}
-
-Good Example:
-Query: Did Jack Dempsey fight the current WBC heavyweight champion?
-Ambiguities: {{"full_form_abbrv_map": [{{"ambiguity_type": "abbreviation", "abbreviation": "WBC", "full_form": "World Boxing Council"}}]}}
-
-Good Example:
-Query: Did Jack Dempsey fight the current World Boxing Council heavyweight champion?
-Ambiguities: {{"full_form_abbrv_map": [{{"ambiguity_type": "full_form", "abbreviation": "WBC", "full_form": "World Boxing Council"}}]}}
-
-Good Example:
+Example:
 Query: Did Jack Dempsey fight the current world boxng council heavyweight champion in the US?
 Ambiguities: {{"full_form_abbrv_map": [{{"ambiguity_type": "full_form", "abbreviation": "WBC", "full_form": "world boxng council"}}, {{"ambiguity_type": "abbreviation", "abbreviation": "US", "full_form": "United States"}}]}}
-"""
+Explanation: There are two distinct possible ambiguities, one is of type full_form which indicates query contains the string under full_form field (world boxng council in the query, not the WBC). The other one is of type abbreviation which indicates query contains the string under abbreviaiton field (US in the query not the United States)."""
 
 user_message = """Query: {query}
 
@@ -53,6 +38,7 @@ Output:"""
 
 
 output_parser = PydanticOutputParser(pydantic_object=QueryAmbiguation)
+output_parser = OutputFixingParser.from_llm(llm=llm, parser=output_parser)
 
 messages = [
     SystemMessagePromptTemplate(
@@ -76,7 +62,9 @@ chain = prompt | llm | output_parser
 
 
 def process_row(row: pd.Series):
-    response: QueryAmbiguation = chain.invoke({"query": row["question"]})
+    response: QueryAmbiguation = chain.invoke(
+        {"query": row["question"]}, config=RunnableConfig(configurable={"llm": "gpt4"})
+    )
     if response.full_form_abbrv_map:
         return response.json()
 
