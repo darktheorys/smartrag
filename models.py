@@ -9,25 +9,3 @@ class QueryAmbiguation(BaseModel):
         full_form: str
 
     full_form_abbrv_map: list[Ambiguity] = Field(description="List of Mapping between full-form and abbreviation.")
-
-
-
-
-class AnswerStr(BaseModel):
-    answer: str
-
-
-class AnswerBool(BaseModel):
-    answer: bool
-
-
-class AnswerJudge(BaseModel):
-    selection: int
-
-
-class Queries(BaseModel):
-    questions: list[tuple[int, str]]
-
-
-class Selector(BaseModel):
-    selection_id: int

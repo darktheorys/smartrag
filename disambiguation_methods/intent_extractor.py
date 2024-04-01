@@ -56,7 +56,7 @@ prompt = ChatPromptTemplate.from_messages(messages=messages)
 chain = prompt | llm | output_parser
 
 
-def extract_intent(df: pd.DataFrame, top_n: int, domain: str | None) -> None:
+def extract_intent(df: pd.DataFrame, top_n: int) -> None:
     for i in tqdm(range(len(df))):
         query = df.loc[i, "ambiguous_question"]
         ambiguities = QueryAmbiguation(**json.loads(df.loc[i, "possible_ambiguities"]))
@@ -71,7 +71,7 @@ def extract_intent(df: pd.DataFrame, top_n: int, domain: str | None) -> None:
         disambs = "".join([f"{i} - {full_form}\n" for i, full_form in enumerate(full_forms)])
 
         answer: IntentExtraction = chain.invoke(
-            {"query": query, "abbrv": amb.abbreviation, "disambs": disambs, "domain": domain if domain else ""}
+            {"query": query, "abbrv": amb.abbreviation, "disambs": disambs, "domain": df.loc[i, "domain"]}
         )
 
         df.loc[i, "intent"] = answer.intent

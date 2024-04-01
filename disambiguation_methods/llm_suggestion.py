@@ -54,14 +54,14 @@ prompt = ChatPromptTemplate.from_messages(messages=messages)
 llm_suggestor = prompt | llm | output_parser
 
 
-def get_abbreviation_suggestions(df: pd.DataFrame, top_n: int = 10, domain: str | None = None) -> None:
+def get_abbreviation_suggestions(df: pd.DataFrame, top_n: int = 10) -> None:
     for i in tqdm(range(len(df))):
         ambiguities = QueryAmbiguation(**json.loads(df.loc[i, "possible_ambiguities"]))
         ambiguous_question = df.loc[i, "ambiguous_question"]
         suggestions = []
         for amb in ambiguities.full_form_abbrv_map:
             answer1: AbbrvResolution = llm_suggestor.invoke(
-                {"query": ambiguous_question, "abbrv": amb.abbreviation, "domain": domain}
+                {"query": ambiguous_question, "abbrv": amb.abbreviation, "domain": df.loc[i, "domain"]}
             )
             suggestions.append(answer1.full_form)
-        df.loc[i, "llm_full_form_suggestion"] = json.dumps(suggestions)
+        df.loc[i, "llm_full_form_suggestions"] = json.dumps(suggestions)
