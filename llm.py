@@ -7,7 +7,7 @@ gpt35 = ChatOpenAI(
     model="gpt-3.5-turbo-0125",
     api_key=secrets.get("OPENAI_API_KEY"),
     max_tokens=4096,
-    temperature=0.0,
+    temperature=0.2,
     model_kwargs={"response_format": {"type": "json_object"}},
 )
 
@@ -16,7 +16,7 @@ llm = (
         model="gpt-4-turbo-preview",
         api_key=secrets.get("OPENAI_API_KEY"),
         max_tokens=4096,
-        temperature=0.0,
+        temperature=0.2,
         model_kwargs={"response_format": {"type": "json_object"}},
     )
     .configurable_alternatives(ConfigurableField("llm", name="llm"), default_key="gpt4", gpt35=gpt35)
