@@ -1,5 +1,5 @@
 import pandas as pd
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import OutputFixingParser, PydanticOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -7,6 +7,7 @@ from langchain.prompts import (
     SystemMessagePromptTemplate,
 )
 from langchain.pydantic_v1 import BaseModel, Field
+from langchain_core.runnables import RunnableConfig
 from tqdm import tqdm
 
 from llm import llm
@@ -208,6 +209,8 @@ serialized_categories = "\n".join(
 
 
 output_parser = PydanticOutputParser(pydantic_object=DomainExtraction)
+output_parser = OutputFixingParser.from_llm(llm=llm, parser=output_parser)
+
 
 messages = [
     SystemMessagePromptTemplate(
@@ -229,11 +232,16 @@ prompt = ChatPromptTemplate.from_messages(messages=messages)
 chain = prompt | llm | output_parser
 
 
-def extract_domains(df: pd.DataFrame) -> None:
-    for i in tqdm(range(len(df))):
-        query = df.loc[i, "ambiguous_question"]
+def extract_domains(df: pd.DataFrame, llm: str = "gpt35", temp: float = 0) -> None:
+    with tqdm(range(len(df))) as pbar:
+        for i in pbar:
+            query = df.loc[i, "ambiguous_question"]
 
-        response: DomainExtraction = chain.invoke({"query": query})
+            response: DomainExtraction = chain.invoke(
+                {"query": query}, config=RunnableConfig(configurable={"llm": llm, "temperature": temp})
+            )
 
-        df.loc[i, "domain_idx"] = int(response.selection)
-    df["domain_idx"] = df["domain_idx"].astype(int)
+            df.loc[i, "domain_idx"] = response.selection
+            category = categories[response.selection] if response.selection < len(categories) else None
+            pbar.set_postfix_str(f"Domain: {category[0] if category else None}")
+        df["domain_idx"] = df["domain_idx"].astype(int)

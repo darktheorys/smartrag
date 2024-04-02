@@ -53,4 +53,3 @@ def get_abbreviation_suggestions(df: pd.DataFrame, top_n: int = 10) -> None:
             abbreviations[amb.abbreviation] = (suggestions[-1], sources[-1])
         df.loc[i, f"top_{top_n}_full_form"] = json.dumps(suggestions)
         df.loc[i, f"top_{top_n}_full_form_sources"] = json.dumps(sources)
-        print(i, json.dumps(sources))

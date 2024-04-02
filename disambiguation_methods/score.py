@@ -1,4 +1,4 @@
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import OutputFixingParser, PydanticOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -17,6 +17,8 @@ class AnswerJudge(BaseModel):
 
 
 output_parser_score = PydanticOutputParser(pydantic_object=AnswerJudge)
+output_parser_score = OutputFixingParser.from_llm(llm=llm, parser=output_parser_score)
+
 
 sys_message_score = """Given a query, three candidate answers and one real answer, your task is to compare three candidate answers.
 

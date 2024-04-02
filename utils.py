@@ -1,5 +1,6 @@
 import json
 import re
+from time import sleep
 
 import requests
 
@@ -11,19 +12,20 @@ import json
 
 def get_abbrv(term: str, n, category=None):
     url = f"https://www.abbreviations.com/serp.php?st={term}&p=99999"
-
-    resp: requests.Response = requests.get(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-        },
-    )
+    resp: requests.Response = None
+    while not resp or resp.status_code != 200:
+        try:
+            resp: requests.Response = requests.get(
+                url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                },
+                timeout=20,
+            )
+        except requests.exceptions.Timeout:
+            sleep(2)
 
     pattern = r'<p class="desc">(.*?)<\/p><p class="path"><a href="[^"]+">(.*?)<\/a>'
-
-    if resp.status_code != 200:
-        print(resp.content)
-        raise RuntimeError()
 
     definitions_prior = list()
     definitions = list()
@@ -39,15 +41,18 @@ def get_abbrv(term: str, n, category=None):
 
 def get_abbrv2(term: str, n=5, category=None):
     def get(url):
-        resp: requests.Response = requests.get(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-            },
-        )
-        if resp.status_code != 200:
-            print(resp.content)
-            raise RuntimeError()
+        resp: requests.Response = None
+        while not resp or resp.status_code != 200:
+            try:
+                resp: requests.Response = requests.get(
+                    url,
+                    headers={
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                    },
+                    timeout=20,
+                )
+            except requests.exceptions.Timeout:
+                sleep(2)
 
         json = resp.content
 
@@ -65,15 +70,18 @@ def get_abbrv2(term: str, n=5, category=None):
 
 def get_abbrv3(term: str, n=5, category=None):
     url = f"https://acronyms.thefreedictionary.com/{term}"
-    resp: requests.Response = requests.get(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-        },
-    )
-    if resp.status_code != 200:
-        print(resp.content)
-        raise RuntimeError()
+    resp: requests.Response = None
+    while not resp or resp.status_code != 200:
+        try:
+            resp: requests.Response = requests.get(
+                url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+                },
+                timeout=20,
+            )
+        except requests.exceptions.Timeout:
+            sleep(2)
 
     json = resp.content
 

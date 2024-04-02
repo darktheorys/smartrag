@@ -1,7 +1,7 @@
 import json
 
 import pandas as pd
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import OutputFixingParser, PydanticOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -21,6 +21,7 @@ class Selector(BaseModel):
 
 
 selector_output_parser = PydanticOutputParser(pydantic_object=Selector)
+selector_output_parser = OutputFixingParser.from_llm(llm=llm, parser=selector_output_parser)
 
 selector_system_prompt = """User will give you a query, in this query there will be an abbreviation. Your task is to resolve that abbreviation.
 User will also provide possible full-forms that you can select from. Please do best you can while selecting from the given list of options.
@@ -61,7 +62,7 @@ def get_llm_selections(df: pd.DataFrame, top_n: int):
         ambiguous_question = df.loc[query_n, "ambiguous_question"]
         ambiguities = QueryAmbiguation(**json.loads(df.loc[query_n, "possible_ambiguities"]))
 
-        all_ambiguity_suggestions: list[list[str]] = [[amb.full_form] for amb in ambiguities.full_form_abbrv_map]
+        all_ambiguity_suggestions: list[list[str]] = [[] for _ in ambiguities.full_form_abbrv_map]
         # if there is a suggestion from APIs
         if isinstance(df.loc[query_n, f"top_{top_n}_full_form"], str):
             api_suggestions: list[list[str]] = json.loads(df.loc[query_n, f"top_{top_n}_full_form"])
@@ -78,7 +79,7 @@ def get_llm_selections(df: pd.DataFrame, top_n: int):
                 json.loads(df.loc[query_n, f"top_{top_n}_full_form_sources"]),
             )
         ):
-            resp = selector_chain.invoke(
+            resp: Selector = selector_chain.invoke(
                 {
                     "abbrv": amb.abbreviation,
                     "query": ambiguous_question,

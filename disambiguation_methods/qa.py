@@ -1,4 +1,4 @@
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import OutputFixingParser, PydanticOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -21,7 +21,11 @@ class AnswerBool(BaseModel):
 IS_BOOL = False
 
 output_parser_bool = PydanticOutputParser(pydantic_object=AnswerBool)
+output_parser_bool = OutputFixingParser.from_llm(llm=llm, parser=output_parser_bool)
+
 output_parser_str = PydanticOutputParser(pydantic_object=AnswerStr)
+output_parser_str = OutputFixingParser.from_llm(llm=llm, parser=output_parser_str)
+
 output_parser_answer = output_parser_str if not IS_BOOL else output_parser_bool
 
 sys_message_answer = """Answer the given questions as concise and short as possible. Do not output something else.

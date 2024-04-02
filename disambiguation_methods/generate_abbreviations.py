@@ -1,5 +1,5 @@
 import pandas as pd
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import OutputFixingParser, PydanticOutputParser
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -48,7 +48,11 @@ Given two distinct terms: "{full_form_1}" and "{full_form_2}"
 {format_instructions}
 """
 abbrv_parser = PydanticOutputParser(pydantic_object=Abbreviation)
+abbrv_parser = OutputFixingParser.from_llm(llm=llm, parser=abbrv_parser)
+
 query_parser = PydanticOutputParser(pydantic_object=AmbiguousQueryTuple)
+query_parser = OutputFixingParser.from_llm(llm=llm, parser=query_parser)
+
 transform = RunnableLambda(lambda x: x.dict())
 
 
