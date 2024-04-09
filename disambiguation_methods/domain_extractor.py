@@ -244,4 +244,5 @@ def extract_domains(df: pd.DataFrame, llm: str = "gpt35", temp: float = 0) -> No
             df.loc[i, "domain_idx"] = response.selection
             category = categories[response.selection] if response.selection < len(categories) else None
             pbar.set_postfix_str(f"Domain: {category[0] if category else None}")
+            df.loc[i, "domain"] = categories[df.loc[i, "domain_idx"]] if response.selection < len(categories) else None
         df["domain_idx"] = df["domain_idx"].astype(int)

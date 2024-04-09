@@ -40,7 +40,7 @@ intents = [
     ),
 ]
 
-intents_serialized = "\n".join([f"{i} - {intent}\n\t{example}" for i, (intent, example) in enumerate(intents)])
+intents_serialized = "\n".join([f"{i} - {intent}\n\tExample: {example}" for i, (intent, example) in enumerate(intents)])
 
 
 class IntentExtraction(BaseModel):

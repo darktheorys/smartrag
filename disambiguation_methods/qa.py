@@ -18,7 +18,7 @@ class AnswerBool(BaseModel):
     answer: bool
 
 
-IS_BOOL = False
+IS_BOOL = True
 
 output_parser_bool = PydanticOutputParser(pydantic_object=AnswerBool)
 output_parser_bool = OutputFixingParser.from_llm(llm=llm, parser=output_parser_bool)
@@ -37,6 +37,7 @@ Domain of the questions is {domain}.
 
 user_message_answer = """Query:{query}
 Intent:{intent}
+Expected Dtype:{dtype}
 Output:"""
 
 
@@ -49,9 +50,7 @@ messages_answer = [
         )
     ),
     HumanMessagePromptTemplate(
-        prompt=PromptTemplate(
-            template=user_message_answer, input_variables=["query", "intent", "reqs"], partial_variables={}
-        )
+        prompt=PromptTemplate(template=user_message_answer, input_variables=["query", "intent", "dtype"], partial_variables={})
     ),
 ]
 prompt_answer = ChatPromptTemplate.from_messages(messages=messages_answer)
