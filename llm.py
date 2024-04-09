@@ -20,7 +20,9 @@ llm = (
         model_kwargs={"response_format": {"type": "json_object"}},
     )
     .configurable_alternatives(ConfigurableField("llm", name="llm"), default_key="gpt4", gpt35=gpt35)
-    .configurable_fields(temperature=ConfigurableField(id="temperature"))
+    .configurable_fields(
+        temperature=ConfigurableField(id="temperature"), model_kwargs=ConfigurableField(id="model_kwargs")
+    )
 )
 
 embedder = OpenAIEmbeddings(api_key=secrets.get("OPENAI_API_KEY"), model="text-embedding-3-large")

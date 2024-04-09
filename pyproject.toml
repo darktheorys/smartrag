@@ -20,6 +20,7 @@ poetry = "^1.8.2"
 jupyter = "^1.0.0"
 ruff = "^0.3.4"
 datasets = "^2.18.0"
+matplotlib = "^3.8.3"
 
 [tool.ruff]
 exclude = [".venv"]

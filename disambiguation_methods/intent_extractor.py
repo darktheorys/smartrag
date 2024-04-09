@@ -1,5 +1,3 @@
-import json
-
 import pandas as pd
 from langchain.output_parsers import OutputFixingParser, PydanticOutputParser
 from langchain.prompts import (
@@ -14,7 +12,6 @@ from tqdm import tqdm
 
 from disambiguation_methods.domain_extractor import categories
 from llm import llm
-from models import QueryAmbiguation
 
 intents = [
     (
@@ -63,8 +60,6 @@ Domain of the query is {domain}.
 {format_instructions}"""
 
 user_message = """Query:{query}
-Abbreviation:{abbrv}
-Possible Disambiguations:{disambs}
 Output:"""
 
 
@@ -92,26 +87,13 @@ prompt = ChatPromptTemplate.from_messages(messages=messages)
 chain = prompt | llm | output_parser
 
 
-def extract_intent(df: pd.DataFrame, top_n: int, llm: str = "gpt4", temp: float = 1.0) -> None:
+def extract_intent(df: pd.DataFrame, llm: str = "gpt4", temp: float = 1.0) -> None:
     with tqdm(range(len(df))) as pbar:
         for i in pbar:
             query = df.loc[i, "ambiguous_question"]
-            ambiguities = QueryAmbiguation(**json.loads(df.loc[i, "possible_ambiguities"]))
-
-            # focus on only the first ambiguity
-            amb = ambiguities.full_form_abbrv_map[0]
-            disambs = ""
-            if not pd.isna(df.loc[i, f"top_{top_n}_full_form"]):
-                full_forms: list[str] = json.loads(df.loc[i, f"top_{top_n}_full_form"])[0]
-            else:
-                full_forms: list[str] = json.loads(df.loc[i, "llm_full_form_suggestion"])
-            disambs = "".join([f"{i} - {full_form}\n" for i, full_form in enumerate(full_forms)])
-
             answer: IntentExtraction = chain.invoke(
                 {
                     "query": query,
-                    "abbrv": amb.abbreviation,
-                    "disambs": disambs,
                     "domain": categories[df.loc[i, "domain_idx"]][0]
                     if df.loc[i, "domain_idx"] < len(categories)
                     else None,
