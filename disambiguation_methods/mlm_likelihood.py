@@ -77,6 +77,7 @@ def get_mlm_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_suggestion:
                     tokenized_disambiguated_question = TOKENIZER(masked_disambiguated_question, return_tensors="pt").to(
                         device
                     )
+                    print(masked_disambiguated_question)
 
                     mask_index = tokenized_disambiguated_question.input_ids[0].tolist().index(TOKENIZER.mask_token_id)
                     with torch.no_grad():

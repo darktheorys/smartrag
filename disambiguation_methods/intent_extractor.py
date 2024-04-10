@@ -10,7 +10,6 @@ from langchain.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import RunnableConfig
 from tqdm import tqdm
 
-from disambiguation_methods.domain_extractor import categories
 from llm import llm
 
 intents = [
@@ -60,6 +59,7 @@ Domain of the query is {domain}.
 {format_instructions}"""
 
 user_message = """Query:{query}
+Expected Response Data Type:{dtype}
 Output:"""
 
 
@@ -77,7 +77,7 @@ messages = [
     HumanMessagePromptTemplate(
         prompt=PromptTemplate(
             template=user_message,
-            input_variables=["query", "abbrv", "disambs"],
+            input_variables=["query", "dtype"],
             partial_variables={},
         )
     ),
@@ -90,13 +90,12 @@ chain = prompt | llm | output_parser
 def extract_intent(df: pd.DataFrame, llm: str = "gpt4", temp: float = 1.0) -> None:
     with tqdm(range(len(df))) as pbar:
         for i in pbar:
-            query = df.loc[i, "ambiguous_question"]
+            query = df.loc[i, "ambiguous_question"] if "ambiguous_question" in df else df.loc[i, "question"]
             answer: IntentExtraction = chain.invoke(
                 {
                     "query": query,
-                    "domain": categories[df.loc[i, "domain_idx"]][0]
-                    if df.loc[i, "domain_idx"] < len(categories)
-                    else None,
+                    "domain": df.loc[i, "domain"],
+                    "dtype": df.loc[i, "dtype"],
                 },
                 config=RunnableConfig(configurable={"llm": llm, "temperature": temp}),
             )

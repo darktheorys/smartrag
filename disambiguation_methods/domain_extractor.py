@@ -235,7 +235,7 @@ chain = prompt | llm | output_parser
 def extract_domains(df: pd.DataFrame, llm: str = "gpt35", temp: float = 0) -> None:
     with tqdm(range(len(df))) as pbar:
         for i in pbar:
-            query = df.loc[i, "ambiguous_question"]
+            query = df.loc[i, "ambiguous_question"] if "ambiguous_question" in df else df.loc[i, "question"]
 
             response: DomainExtraction = chain.invoke(
                 {"query": query}, config=RunnableConfig(configurable={"llm": llm, "temperature": temp})

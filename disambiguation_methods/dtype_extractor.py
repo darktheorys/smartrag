@@ -39,6 +39,8 @@ class DtypeExtraction(BaseModel):
 sys_message = """User will provide you with a query. Your task is to classify that query into expected answer data type. 
 Data types are provided below with their subset of type within that field. Select only data type domain from corresponding list.
 
+Domain of the question is {domain}
+
 {dtypes}
 
 {format_instructions}
@@ -58,7 +60,7 @@ messages = [
     SystemMessagePromptTemplate(
         prompt=PromptTemplate(
             template=sys_message,
-            input_variables=[],
+            input_variables=["domain"],
             partial_variables={
                 "format_instructions": output_parser.get_format_instructions(),
                 "dtypes": serialized_dtypes,
@@ -77,13 +79,13 @@ chain = prompt | llm | output_parser
 def extract_dtypes(df: pd.DataFrame, llm: str = "gpt35", temp: float = 0) -> None:
     with tqdm(range(len(df))) as pbar:
         for i in pbar:
-            query = df.loc[i, "ambiguous_question"]
+            query = df.loc[i, "ambiguous_question"] if "ambiguous_question" in df else df.loc[i, "question"]
 
             response: DtypeExtraction = chain.invoke(
-                {"query": query}, config=RunnableConfig(configurable={"llm": llm, "temperature": temp})
+                {"query": query, "domain": df.loc[i, "domain"]},
+                config=RunnableConfig(configurable={"llm": llm, "temperature": temp}),
             )
 
-            df.loc[i, "domain_idx"] = response.selection
             dtype = dtypes[response.selection][0] if response.selection < len(dtypes) else ""
             pbar.set_postfix_str(f"Dtype: {dtype if dtype else None}")
             df.loc[i, "dtype"] = dtype + "-" + response.subtype

@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from utils import secrets
 
 gpt35 = ChatOpenAI(
-    model="gpt-3.5-turbo-0125",
+    model="gpt-3.5-turbo",
     api_key=secrets.get("OPENAI_API_KEY"),
     max_tokens=4096,
     temperature=0.2,
@@ -13,7 +13,7 @@ gpt35 = ChatOpenAI(
 
 llm = (
     ChatOpenAI(
-        model="gpt-4-turbo-preview",
+        model="gpt-4-turbo",
         api_key=secrets.get("OPENAI_API_KEY"),
         max_tokens=4096,
         temperature=0.2,

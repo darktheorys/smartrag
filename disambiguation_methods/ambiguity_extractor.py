@@ -79,16 +79,22 @@ def extract_ambiguities(df: pd.DataFrame):
         question: str = df.loc[i, "question"]
         ambiguities = QueryAmbiguation(**json.loads(df.loc[i, "possible_ambiguities"]))
         unambiguous_question, ambiguous_question = question, question
-
-        for amb in ambiguities.full_form_abbrv_map:
+        pops = []
+        for i, amb in enumerate(ambiguities.full_form_abbrv_map):
             if amb.ambiguity_type == "abbreviation" and amb.abbreviation in question:
                 unambiguous_question = unambiguous_question.replace(amb.abbreviation, amb.full_form)
                 ambiguous_question = ambiguous_question
             elif amb.ambiguity_type == "full_form" and amb.full_form in question:
                 unambiguous_question = unambiguous_question
                 ambiguous_question = ambiguous_question.replace(amb.full_form, amb.abbreviation)
+            else:
+                pops.append(i)
         if ambiguous_question == unambiguous_question:
             continue
+
+        for pop in reversed(pops):
+            ambiguities.full_form_abbrv_map.pop(pop)
+        df.loc[i, "possible_ambiguities"] = ambiguities.json() if ambiguities.full_form_abbrv_map else None
         df.loc[i, "ambiguous_question"] = ambiguous_question
         df.loc[i, "unambiguous_question"] = unambiguous_question
     df.dropna(axis=0, inplace=True)
