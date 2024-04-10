@@ -16,7 +16,9 @@ from models import QueryAmbiguation
 
 class AmbiguousQueryTuple(BaseModel):
     query_1: str = Field(description="First Ambiguous query generated from abbreviation")
+    answer_1: str = Field(description="Answer to the first query")
     query_2: str = Field(description="Second Ambiguous query generated from abbreviation")
+    answer_2: str = Field(description="Answer to the second query")
 
 
 class Abbreviation(BaseModel):
@@ -123,6 +125,7 @@ def generate_ambiguous_queries(n_queries: int = 1, temperature: float = 1.0) -> 
                         "question": query_tuple.query_1.replace(abbrv.full_form_1, abbrv.abbreviation),
                         "ambiguous_question": query_tuple.query_1.replace(abbrv.full_form_1, abbrv.abbreviation),
                         "unambiguous_question": query_tuple.query_1,
+                        "answer": query_tuple.answer_1,
                     },
                     {
                         "possible_ambiguities": QueryAmbiguation(
@@ -137,6 +140,7 @@ def generate_ambiguous_queries(n_queries: int = 1, temperature: float = 1.0) -> 
                         "question": query_tuple.query_2.replace(abbrv.full_form_2, abbrv.abbreviation),
                         "ambiguous_question": query_tuple.query_2.replace(abbrv.full_form_2, abbrv.abbreviation),
                         "unambiguous_question": query_tuple.query_2,
+                        "answer": query_tuple.answer_2,
                     },
                 ]
                 data.extend(df_data)
