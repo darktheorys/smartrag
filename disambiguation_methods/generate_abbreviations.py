@@ -29,8 +29,7 @@ class Abbreviation(BaseModel):
 
 sys_message = """You are a helpful assistant. No yapping. Just do as you told. Do not interact or inform the user. Make sure to follow them or you will be shutdown."""
 
-generate_abbrevations_stage_1 = """Find a single, real, ambiguous abbreviation that has at least two distinct full-forms, then provide first two full-forms, it can be from Finance, Marketing, Technology, Science, Medical domains.
-Do not come up with an abbreviation, it should be accepted by authorities.
+generate_abbrevations_stage_1 = """Find a single, real, ambiguous abbreviation, acronym that has at least two distinct full-forms and meanings, then provide two full-forms, it can be from Finance, Marketing, Technology, Science, Medical, Computing, Governmentak domains.
 
 Create something different than the ones listed below:
 {previous_abbrvs}
@@ -42,10 +41,11 @@ generate_abbrevations_stage_2 = """Your aim is to generate a query tuple with th
 Given two distinct terms: "{full_form_1}" and "{full_form_2}"
 
 -Use those two distinct terms to create two separate queries and aim for a different/distinct specific answer depending on them.
--Generated queries should convey similar messages, or concepts. In other words, they should not be completely aiming for different target domains/answers.
--Queries must be multi-hop, complex, hard to answer and retrieval enabling. Additionally, possible answer to those queries must depend on the full-form of abbreviation, meaning it should not be an expression rather concept.
+-Generated query tuples should aim for different answers, but their domain can be same.
+-Queries can be multi-hop, complex, hard to answer and retrieval enabling. Additionally, possible answer to those queries should depend on the full-form of abbreviation, meaning it should not be an expression rather concept.
 -Queries should definitely contain the terms given above, as is (exactly the with the given form above), not the abbreviations or other names for them.
 -Finally, try to hide the focus on the abbreviation, make queries natural and close to real-life scenarios.
+-Do not produce very long sequences, being concise and following other rules are enough.
 
 {format_instructions}
 """
