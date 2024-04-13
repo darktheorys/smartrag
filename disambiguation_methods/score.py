@@ -33,8 +33,7 @@ user_message_score = """Query:{query}
 Real Answer: {answer}
 First Candidate: {amb}
 Second Candidate: {unamb}
-Third Candidate: {disamb}
-Output:"""
+Third Candidate: {disamb}"""
 
 messages_score = [
     SystemMessagePromptTemplate(

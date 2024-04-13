@@ -24,27 +24,15 @@ def get_abbreviation_suggestions(df: pd.DataFrame, top_n: int = 10) -> None:
             popular_suggestions = get_abbrv(
                 amb.abbreviation,
                 top_n,
-                category=categories[df.loc[i, "domain_idx"]][0] if df.loc[i, "domain_idx"] < len(categories) else None,
+                category=df.loc[i, "domain"],
             )
             suggestion_sources = ["ABBREVIATIONS"] * len(popular_suggestions)
             if len(popular_suggestions) < top_n:
-                popular_suggestions_ = get_abbrv2(
-                    amb.abbreviation,
-                    top_n,
-                    category=categories[df.loc[i, "domain_idx"]][0]
-                    if df.loc[i, "domain_idx"] < len(categories)
-                    else None,
-                )
+                popular_suggestions_ = get_abbrv2(amb.abbreviation, top_n, category=df.loc[i, "domain"])
                 popular_suggestions += popular_suggestions_
                 suggestion_sources += ["ACRONYMFINDER"] * len(popular_suggestions_)
             if len(popular_suggestions) < top_n:
-                popular_suggestions_ = get_abbrv3(
-                    amb.abbreviation,
-                    top_n,
-                    category=categories[df.loc[i, "domain_idx"]][0]
-                    if df.loc[i, "domain_idx"] < len(categories)
-                    else None,
-                )
+                popular_suggestions_ = get_abbrv3(amb.abbreviation, top_n, category=df.loc[i, "domain"])
                 popular_suggestions += popular_suggestions_
                 suggestion_sources += ["THEFREEDICTIONARY"] * len(popular_suggestions_)
             sleep(2)
