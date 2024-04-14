@@ -18,7 +18,7 @@ class AnswerBool(BaseModel):
     answer: bool
 
 
-IS_BOOL = False
+IS_BOOL = True
 
 output_parser_bool = PydanticOutputParser(pydantic_object=AnswerBool)
 output_parser_bool = OutputFixingParser.from_llm(llm=llm, parser=output_parser_bool)

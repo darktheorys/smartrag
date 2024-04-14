@@ -8,6 +8,8 @@ gpt35 = ChatOpenAI(
     api_key=secrets.get("OPENAI_API_KEY"),
     max_tokens=4096,
     temperature=0.2,
+    timeout=20,
+    max_retries=5,
     model_kwargs={"response_format": {"type": "json_object"}},
 )
 
@@ -17,6 +19,8 @@ llm = (
         api_key=secrets.get("OPENAI_API_KEY"),
         max_tokens=4096,
         temperature=0.2,
+        timeout=20,
+        max_retries=5,
         model_kwargs={"response_format": {"type": "json_object"}},
     )
     .configurable_alternatives(ConfigurableField("llm", name="llm"), default_key="gpt4", gpt35=gpt35)
