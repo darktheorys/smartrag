@@ -91,7 +91,6 @@ def extract_ambiguities(df: pd.DataFrame):
                 pops.append(i)
         if ambiguous_question == unambiguous_question:
             continue
-
         for pop in reversed(pops):
             ambiguities.full_form_abbrv_map.pop(pop)
         df.loc[i, "possible_ambiguities"] = ambiguities.json() if ambiguities.full_form_abbrv_map else None
