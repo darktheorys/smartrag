@@ -1,0 +1,58 @@
+{
+    "steps": [
+        "Identify the Registrant's name and the specific stocks involved.",
+        "Retrieve the historical stock prices for both voting and non-voting shares as of March 25, 2022.",
+        "Calculate the total number of shares held by non-affiliates for both categories of stock.",
+        "Multiply the number of shares by the stock prices to get the aggregate market value for each category.",
+        "Sum the aggregate market values of both voting and non-voting stocks to get the total aggregate market value."
+    ],
+    "findings": [
+        "Datatype: Float - The query requires a numerical value with potential decimal points as it involves financial calculations.",
+        "Contextual Sensitivity: Context Dependent - The query is specific to a particular date and set of financial circumstances, which are subject to change.",
+        "Query Understanding Classification: Explicit - The query clearly specifies the information required, involving specific financial terms and a precise date.",
+        "Retrieval & Synthesis Dimension: Synthetic Retrieval Inquiry - Requires accessing historical financial data, calculating values based on conditions (non-affiliates' holdings), and synthesizing these to provide a comprehensive financial figure.",
+        "Query Intent: Informational/Instructional - The query seeks a specific piece of financial information."
+    ],
+    "graph": {
+        "nodes": {
+            "1": {
+                "operation": "Identify Registrant and stocks",
+                "output": "Registrant details, stock types"
+            },
+            "2": {
+                "operation": "Retrieve historical stock prices",
+                "output": "Stock prices as of March 25, 2022"
+            },
+            "3": {
+                "operation": "Calculate shares held by non-affiliates",
+                "output": "Number of shares"
+            },
+            "4": {
+                "operation": "Calculate market value for each stock type",
+                "output": "Market values"
+            },
+            "5": {
+                "operation": "Sum market values",
+                "output": "Total aggregate market value"
+            }
+        },
+        "edges": {
+            "1": {
+                "source": "1",
+                "target": "2"
+            },
+            "2": {
+                "source": "2",
+                "target": "3"
+            },
+            "3": {
+                "source": "3",
+                "target": "4"
+            },
+            "4": {
+                "source": "4",
+                "target": "5"
+            }
+        }
+    }
+}
