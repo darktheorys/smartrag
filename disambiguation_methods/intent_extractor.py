@@ -49,18 +49,17 @@ class IntentExtraction(BaseModel):
 output_parser = PydanticOutputParser(pydantic_object=IntentExtraction)
 output_parser = OutputFixingParser.from_llm(llm=llm, parser=output_parser)
 
-sys_message = """Classify the intent from given query as strings. It should help a person who is aiming to answer that question.
-Queries may contain an ambiguous abbreviation, for them, abbreviation and possible disambiguations will be provided.
+sys_message = """You are an AI assistant. Follow the guidelines and requirements described carefully and then perform the given task using the queries from the user. 
+            
+Task Guideline:
+Classify the 'intent' from the given query as described. The intent classification should help the entity find a response to a given query by the user.
 
-Domain of the query is {domain}.
-
+Classes:
 {intents}
 
 {format_instructions}"""
 
-user_message = """Query:{query}
-Expected Response Data Type:{dtype}
-Output:"""
+user_message = """Query:{query}"""
 
 
 messages = [
@@ -77,7 +76,7 @@ messages = [
     HumanMessagePromptTemplate(
         prompt=PromptTemplate(
             template=user_message,
-            input_variables=["query", "dtype"],
+            input_variables=["query"],
             partial_variables={},
         )
     ),
@@ -94,8 +93,6 @@ def extract_intent(df: pd.DataFrame, llm: str = "gpt4", temp: float = 1.0) -> No
             answer: IntentExtraction = chain.invoke(
                 {
                     "query": query,
-                    "domain": df.loc[i, "domain"],
-                    "dtype": df.loc[i, "dtype"],
                 },
                 config=RunnableConfig(configurable={"llm": llm, "temperature": temp}),
             )

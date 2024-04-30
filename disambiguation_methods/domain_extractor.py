@@ -32,6 +32,7 @@ categories = [
             "Physics",
             "Universities",
         ),
+        "This domain represents the academic and scientific fields. It includes subcategories like Biology, Chemistry, Mathematics, and Physics.",
     ),
     (
         "COMPUTING",
@@ -52,6 +53,7 @@ categories = [
             "Texting",
             "Unix Commands",
         ),
+        "This domain represents the computing field from hardware to software. It includes subcategories like Databases, Networking, and Software.",
     ),
     (
         "COMMUNITY",
@@ -73,6 +75,7 @@ categories = [
             "Sports",
             "Unions",
         ),
+        "This domain represents the community field, as the name suggests. It includes subcategories like Educational, Law, and Music.",
     ),
     (
         "BUSINESS",
@@ -89,16 +92,19 @@ categories = [
             "Stock Exchange",
             "Tax",
         ),
+        "This domain represents the business and finance fields with subcategories like Accounting, Tax, and Stock Exchange.",
     ),
     (
         "GOVERNMENTAL",
         "Governmental",
         ("FBI", "FDA", "Military", "NASA", "Police", "State & Local", "Suppliers", "Transportation", "UN", "US Gov"),
+        "This domain represents all the governmental organizations and departments. It includes subcategories like FBI, NASA, and US",
     ),
     (
         "INTERNET",
         "Internet",
         ("ASCII", "Blogs", "Chat", "Domain Names", "Emoticons", "HTTP", "MIME", "Twitter", "Wannas", "Websites"),
+        "This domain represents the internet field with subcategories like Blogs, Chat, and Websites.",
     ),
     (
         "MISCELLANEOUS",
@@ -121,6 +127,7 @@ categories = [
             "Unit Measures",
             "Journal Abbreviations",
         ),
+        "This domain represents miscellaneous topics that do not fit into the above categories. It includes subcategories like Chess, Food, and Sci-Fi."
     ),
     (
         "REGIONAL",
@@ -141,6 +148,7 @@ categories = [
             "Time Zones",
             "US States",
         ),
+        "This domain represents regional topics like countries, cities, and languages. It includes subcategories like African, European, and US States."
     ),
     (
         "MEDICAL",
@@ -160,6 +168,7 @@ categories = [
             "Prescription",
             "Veterinary",
         ),
+        "This domain represents the medical field with subcategories like Dental, Drugs, and Neurology. It is the one that deals with health, medicine, viruses, and diseases."
     ),
     (
         "INTERNATIONAL",
@@ -184,6 +193,7 @@ categories = [
             "Thai",
             "Turkish",
         ),
+        "This domain represents international topics and languages. It includes subcategories like Arabic, French, and Spanish."
     ),
 ]
 

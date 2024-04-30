@@ -15,18 +15,20 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # tokenizer = AutoTokenizer.from_pretrained("FacebookAI/xlm-roberta-base")
 # model = AutoModelForMaskedLM.from_pretrained("FacebookAI/xlm-roberta-base").to("cuda")
 
-# tokenizer = AutoTokenizer.from_pretrained("distilbert/distilroberta-base")
-# model = AutoModelForMaskedLM.from_pretrained("distilbert/distilroberta-base").to("cuda")
+TOKENIZER = AutoTokenizer.from_pretrained("distilbert/distilroberta-base")
+MLM = AutoModelForMaskedLM.from_pretrained("distilbert/distilroberta-base").to("cuda")
 
 # tokenizer = AutoTokenizer.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
 # model = AutoModelForMaskedLM.from_pretrained("emilyalsentzer/Bio_ClinicalBERT").to("cuda")
-TOKENIZER = AutoTokenizer.from_pretrained("medicalai/ClinicalBERT")
-MLM = AutoModelForMaskedLM.from_pretrained("medicalai/ClinicalBERT").to(device)
+# TOKENIZER = AutoTokenizer.from_pretrained("medicalai/ClinicalBERT")
+# MLM = AutoModelForMaskedLM.from_pretrained("medicalai/ClinicalBERT").to(device)
 
 UNCASED = False
 
 
-def get_mlm_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_suggestion: bool = False):
+def get_mlm_likelihoods(
+    df: pd.DataFrame, top_n: int, *, include_llm_suggestion: bool = False, use_min_token_length: bool = False
+):
     for query_n in tqdm(range(len(df))):
         ambiguous_question: str = df.loc[query_n, "ambiguous_question"]
         ambiguities = QueryAmbiguation(**json.loads(df.loc[query_n, "possible_ambiguities"]))
@@ -56,6 +58,19 @@ def get_mlm_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_suggestion:
         ):
             to_be_masked_question = ambiguous_question.replace(amb.abbreviation, amb.abbreviation + " ({abbreviation})")
             suggestion_likelihoods = []
+            if use_min_token_length:
+                min_token_length = (
+                    min(
+                        len(
+                            TOKENIZER(
+                                suggestion.strip() if UNCASED else suggestion.casefold().strip(), return_tensors="pt"
+                            ).input_ids[0]
+                        )
+                        for suggestion in suggestions
+                    )
+                    - 2
+                )
+
             for suggestion in suggestions:
                 tokenized_suggestion = TOKENIZER(
                     suggestion.strip() if UNCASED else suggestion.casefold().strip(), return_tensors="pt"
@@ -67,7 +82,7 @@ def get_mlm_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_suggestion:
                 masked_suggestion_state = [TOKENIZER.mask_token_id for _ in range(length)]
 
                 logit_sum = 0.0
-                for i in range(length):
+                for i in range(min_token_length if use_min_token_length else length):
                     # get next first token to calculate probability
                     current_token_id = tokenized_suggestion.input_ids[0][i + 1]
 
@@ -111,3 +126,12 @@ def get_mlm_likelihoods(df: pd.DataFrame, top_n: int, *, include_llm_suggestion:
         df.loc[query_n, "MLM_most_likely_full_form_probs"] = json.dumps(most_likely_full_form_probs)
         df.loc[query_n, "MLM_most_likely_selection_types"] = json.dumps(most_likely_selection_type)
         df.loc[query_n, f"MLM_top_{top_n}_full_form_probs"] = json.dumps(top_n_full_form_probs)
+
+
+# import pandas as pd
+
+# df = pd.read_csv("qa_ambiguous_with_top10.csv")
+
+# get_mlm_likelihoods(df, 10, include_llm_suggestion=False, use_min_token_length=True)
+
+# df.to_csv("a.csv")

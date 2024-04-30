@@ -36,18 +36,19 @@ class DtypeExtraction(BaseModel):
     subtype: str = Field(description="Name of the actual expected type")
 
 
-sys_message = """User will provide you with a query. Your task is to classify that query into expected answer data type. 
-Data types are provided below with their subset of type within that field. Select only data type domain from corresponding list.
+sys_message = """You are an AI assistant. Follow the guidelines and requirements described carefully and then perform the given task using the queries from the user. 
 
-Domain of the question is {domain}
+    Task Guideline:data type in response to a given query by the user. 
+    Pre-defined data types are provided below with their sub-type within that field. 
+    Select only the data type domain from the corresponding list.
 
-{dtypes}
+    Classes:
+    {dtypes}
 
-{format_instructions}
+    {format_instructions}
 """
 
-user_message = """Query: {query}
-Output:"""
+user_message = """Query: {query}"""
 
 serialized_dtypes = "\n".join([f"{i} - {dt}\n\t" + sub for i, (dt, sub) in enumerate(dtypes)])
 
@@ -60,7 +61,7 @@ messages = [
     SystemMessagePromptTemplate(
         prompt=PromptTemplate(
             template=sys_message,
-            input_variables=["domain"],
+            input_variables=[],
             partial_variables={
                 "format_instructions": output_parser.get_format_instructions(),
                 "dtypes": serialized_dtypes,
@@ -82,7 +83,7 @@ def extract_dtypes(df: pd.DataFrame, llm: str = "gpt35", temp: float = 0) -> Non
             query = df.loc[i, "ambiguous_question"] if "ambiguous_question" in df else df.loc[i, "question"]
 
             response: DtypeExtraction = chain.invoke(
-                {"query": query, "domain": df.loc[i, "domain"]},
+                {"query": query},
                 config=RunnableConfig(configurable={"llm": llm, "temperature": temp}),
             )
 
