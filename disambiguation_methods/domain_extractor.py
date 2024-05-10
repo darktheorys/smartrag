@@ -127,7 +127,7 @@ categories = [
             "Unit Measures",
             "Journal Abbreviations",
         ),
-        "This domain represents miscellaneous topics that do not fit into the above categories. It includes subcategories like Chess, Food, and Sci-Fi."
+        "This domain represents miscellaneous topics that do not fit into the above categories. It includes subcategories like Chess, Food, and Sci-Fi.",
     ),
     (
         "REGIONAL",
@@ -148,7 +148,7 @@ categories = [
             "Time Zones",
             "US States",
         ),
-        "This domain represents regional topics like countries, cities, and languages. It includes subcategories like African, European, and US States."
+        "This domain represents regional topics like countries, cities, and languages. It includes subcategories like African, European, and US States.",
     ),
     (
         "MEDICAL",
@@ -168,7 +168,7 @@ categories = [
             "Prescription",
             "Veterinary",
         ),
-        "This domain represents the medical field with subcategories like Dental, Drugs, and Neurology. It is the one that deals with health, medicine, viruses, and diseases."
+        "This domain represents the medical field with subcategories like Dental, Drugs, and Neurology. It is the one that deals with health, medicine, viruses, and diseases.",
     ),
     (
         "INTERNATIONAL",
@@ -193,7 +193,7 @@ categories = [
             "Thai",
             "Turkish",
         ),
-        "This domain represents international topics and languages. It includes subcategories like Arabic, French, and Spanish."
+        "This domain represents international topics and languages. It includes subcategories like Arabic, French, and Spanish.",
     ),
 ]
 
@@ -214,7 +214,7 @@ user_message = """Query: {query}
 Output:"""
 
 serialized_categories = "\n".join(
-    [f"{i} - {cat}\n\t-" + "\n\t-".join(ex) for i, (cat, alias, ex) in enumerate(categories)]
+    [f"{i} - {cat}\n\t-" + "\n\t-".join(ex) for i, (cat, alias, ex, _) in enumerate(categories)]
 )
 
 
